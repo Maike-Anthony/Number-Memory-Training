@@ -2,7 +2,30 @@ import keyboard
 import time
 from datetime import date, datetime
 
-CONSTANTS = ["Phi"]
+class Constants:
+    def __init__(self):
+        self.cons = []
+        while True:
+            try:
+                f = open("Constants.txt", "r")
+                break
+            except FileNotFoundError:
+                f = open("Constants.txt", "w")
+                f.close
+        reader = f.readlines()
+        for line in reader:
+            self.cons.append(line)
+        f.close()
+        if len(self.cons) == 0:
+            print("You need to add some constant first.")
+            exit()
+    
+    def getconst(self, index):
+        return self.cons[index]
+    
+    @property
+    def getlist(self):
+        return self.cons
 
 class Mistakes:
     date = ""
@@ -19,6 +42,10 @@ class Mistakes:
         self.position = position
         self.expected = expected
         self.received = received
+
+    def __str__(self):
+        return self.date + "," + self.time + "," + str(self.constant) + "," +  str(self.position) \
+            + "," +  str(self.expected) + "," + str(self.received)
 
 def check(digits, start = 1, constantname = ""):
     print("Type the digits (esc to leave): ")
@@ -53,13 +80,15 @@ def get_int_in_range(message, rng):
 
 def main():
     while True:
+        global constant
+        constant = Constants()
         print("Train one of these constants: ")
-        for i in range(len(CONSTANTS)):
+        for i in range(len(constant.getlist)):
             print((str)(i+1) + ". ", end="")
-            print(CONSTANTS[i])
+            print(constant.getconst(i).capitalize())
         print()
-        n = get_int_in_range("Type one of the constant's number: ", len(CONSTANTS))
-        filename = CONSTANTS[n-1] + ".txt"
+        n = get_int_in_range("Type one of the constant's number: ", len(constant.getlist))
+        filename = constant.getconst(n-1) + ".txt"
         try:
             f = open(filename, 'r')
         except FileNotFoundError:
@@ -67,7 +96,7 @@ def main():
             exit()
         digits = f.read()
         chosen_start = get_int_in_range("Do you want to start at what position? ", len(digits))
-        check(digits, start = chosen_start, constantname=CONSTANTS[n-1])
+        check(digits, start = chosen_start, constantname=constant.getconst(n-1))
         f.close()
         print()
         while True:
