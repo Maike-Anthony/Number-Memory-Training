@@ -10,22 +10,39 @@ class Constants:
                 f = open("Constants.txt", "r")
                 break
             except FileNotFoundError:
-                f = open("Constants.txt", "w")
-                f.close
+                f = open("Constants.txt", "a")
         reader = f.readlines()
         for line in reader:
             self.cons.append(line)
-        f.close()
         if len(self.cons) == 0:
             print("You need to add some constant first.")
-            exit()
+            self.setconst()
+        f.close()
     
+    def setconst(self):
+        name = input("Insert the number's name: ")
+        digits = input("Paste its decimal places: ")
+        names = open("Constants.txt", "a")
+        names.write(name)
+        names.close()
+        self.cons.append(name)
+        number = open(name + ".txt", "w")
+        number.write(digits)
+        number.close()
+
     def getconst(self, index):
         return self.cons[index]
     
     @property
     def getlist(self):
         return self.cons
+    
+    def __str__(self) -> str:
+        text = ""
+        for i in range(len(constant.getlist)):
+            text += (str(i+1)) + ". " + constant.getconst(i).capitalize() + "\n"
+        return text
+        
 
 class Mistakes:
     date = ""
@@ -83,10 +100,7 @@ def main():
         global constant
         constant = Constants()
         print("Train one of these constants: ")
-        for i in range(len(constant.getlist)):
-            print((str)(i+1) + ". ", end="")
-            print(constant.getconst(i).capitalize())
-        print()
+        print(constant)
         n = get_int_in_range("Type one of the constant's number: ", len(constant.getlist))
         filename = constant.getconst(n-1) + ".txt"
         try:
