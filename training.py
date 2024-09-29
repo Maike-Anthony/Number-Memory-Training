@@ -101,7 +101,7 @@ def main():
         constant = Constants()
         print("Train one of these constants: ")
         print(constant)
-        n = get_int_in_range("Type one of the constant's number: ", len(constant.getlist))
+        n = get_int_in_range("Choose a number: ", len(constant.getlist))
         filename = constant.getconst(n-1) + ".txt"
         try:
             f = open(filename, 'r')
