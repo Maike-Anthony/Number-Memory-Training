@@ -13,7 +13,7 @@ class Constants:
                 f = open("Constants.txt", "a")
         reader = f.readlines()
         for line in reader:
-            self.cons.append(line)
+            self.cons.append(line[:-1])
         if len(self.cons) == 0:
             print("You need to add some constant first.")
             self.setconst()
@@ -23,7 +23,7 @@ class Constants:
         name = input("Insert the number's name: ")
         digits = input("Paste its decimal places: ")
         names = open("Constants.txt", "a")
-        names.write(name)
+        names.write(name + "\n")
         names.close()
         self.cons.append(name)
         number = open(name + ".txt", "w")
