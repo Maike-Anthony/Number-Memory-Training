@@ -1,6 +1,7 @@
 import keyboard
 import time
 from datetime import date, datetime
+import os
 
 class Constants:
     def __init__(self):
@@ -13,14 +14,14 @@ class Constants:
                 f = open("Constants.txt", "a")
         reader = f.readlines()
         for line in reader:
-            self.cons.append(line[:-1])
+            self.cons.append(line.strip("\n"))
         if len(self.cons) == 0:
             print("You need to add some constant first.")
             self.setconst()
         f.close()
     
     def setconst(self):
-        name = input("Insert the number's name: ")
+        name = input("Insert the number's name: ").strip().lower()
         digits = input("Paste its decimal places: ")
         names = open("Constants.txt", "a")
         names.write(name + "\n")
@@ -29,6 +30,23 @@ class Constants:
         number = open(name + ".txt", "w")
         number.write(digits)
         number.close()
+
+    def delconst(self, index):
+        question = yorn("Are you sure you want to delete " + constant.getconst(index) + "?")
+        if question == False:
+            return
+        number = self.getconst(index)
+        self.cons.pop(index)
+        f = open("Constants.txt", "r")
+        oldlines = f.readlines()
+        f.close()
+        f = open("Constants.txt", "w")
+        for line in oldlines:
+            if line.strip("\n") != number:
+                f.write(line)
+        f.close()
+        if os.path.isfile(number + ".txt"):
+            os.remove(number + ".txt")
 
     def getconst(self, index):
         return self.cons[index]
@@ -81,7 +99,7 @@ def check(digits, start = 1, constantname = ""):
         while keyboard.is_pressed(tecla):
             time.sleep(0.01)
 
-def get_int_in_range(message, rng):
+def get_int_in_range(message, rng, zero="invalid"):
     print(message, end="")
     while True:
         try:
@@ -89,19 +107,43 @@ def get_int_in_range(message, rng):
         except ValueError:
             print("Invalid input. Please type a number: ", end = "")
             continue
-        if (n-1) not in range(rng):
+        if n == 0 and zero=="valid":
+            return None
+        elif (n-1) not in range(rng):
             print("Invalid number. Please type a number between 1 and " + str(rng) + ": ", end="")
             continue
         else:
             return n
 
+def yorn(message):
+    while True:
+        answ = input(message + " (y, n) ").lower()
+        if answ not in ["yes,", "y", "no", "n"]:
+            print("Invalid input. Type 'yes' or 'no'.")
+            continue
+        else:
+            break
+    if answ in ["no", "n"]:
+        return False
+    else:
+        return True
+
 def main():
     while True:
         global constant
         constant = Constants()
-        print("Train one of these constants: ")
-        print(constant)
-        n = get_int_in_range("Choose a number: ", len(constant.getlist))
+        while True:
+            print("Train one of these constants: ")
+            print(constant)
+            n = get_int_in_range("Choose a number (type " + str(len(constant.getlist) + 1) + " to add a new one or 0 to delete one): ", len(constant.getlist) + 1, zero="valid")
+            if n == len(constant.getlist) + 1:
+                constant.setconst()
+            elif n is None:
+                index = get_int_in_range("Choose a number to delete: ", len(constant.getlist), zero="valid")
+                if index != None:
+                    constant.delconst(index-1)
+            else:
+                break
         filename = constant.getconst(n-1) + ".txt"
         try:
             f = open(filename, 'r')
@@ -113,14 +155,8 @@ def main():
         check(digits, start = chosen_start, constantname=constant.getconst(n-1))
         f.close()
         print()
-        while True:
-            answ = input("Do you want to train again? (y, n) ").lower()
-            if answ not in ["yes,", "y", "no", "n"]:
-                print("Invalid input. Type 'yes' or 'no'.")
-                continue
-            else:
-                break
-        if answ in ["no", "n"]:
+        question = yorn("Do you want to train again?")
+        if question == False:
             break
 
 if __name__ == "__main__":
