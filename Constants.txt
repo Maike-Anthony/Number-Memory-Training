@@ -1,2 +1,2 @@
-phi
-pi
+Phi
+Pi

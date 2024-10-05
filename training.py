@@ -23,8 +23,17 @@ class Constants:
         f.close()
     
     def setconst(self):
-        name = input("Insert the number's name: ").strip().lower()
-        digits = input("Paste its decimal places: ")
+        name = input("Insert the number's name: ").strip().capitalize()
+        while True:
+            try:
+                digits = input("Paste its decimal places: ")
+                test = int(digits)
+                if test < 0:
+                    print("Please, don't type the minus sign.")
+                else:
+                    break
+            except ValueError:
+                print("Please, type only the decimal places.")
         with open("Constants.txt", "a") as names:
             names.write(name + "\n")
         self.cons.append(name)
@@ -56,7 +65,7 @@ class Constants:
     def __str__(self) -> str:
         text = ""
         for i in range(len(constant.getlist)):
-            text += (str(i+1)) + ". " + constant.getconst(i).capitalize() + "\n"
+            text += (str(i+1)) + ". " + constant.getconst(i) + "\n"
         return text
         
 
@@ -106,23 +115,26 @@ class Performance:
         mistake = Mistakes(constant = self.constant, position = self.startposition + self.digits, expected = expecteddigit, received = receiveddigit)
 
     def start(self):
-        self.starttime = time.time()
+        self.starttime = datetime.now()
 
     def stop(self):
-        self.end = time.time()
-        self.duration = self.end - self.starttime
+        self.end = datetime.now()
+        subtraction = self.end - self.starttime
+        hours, remainder = divmod(subtraction.total_seconds(), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        self.duration = f"{hours:02.0f}:{minutes:02.0f}:{seconds:02.0f}"
         if (Decimal(self.digits) + Decimal(self.mistakes)) != 0:
             self.rate = ((Decimal(self.digits) / (Decimal(self.digits) + Decimal(self.mistakes)))* 100).quantize(Decimal("0.01"))
         else:
             self.rate = 0
         self.data = {
-            "date": self.date, "time": self.time, "constant": self.constant, "duration": self.duration, "start position": self.startposition, "# correct digits": self.digits, "mistakes": self.mistakes, "rate": self.rate
+            "date": self.date, "time": self.time, "constant": self.constant, "duration": self.duration, "start position": self.startposition, "# correct digits": self.digits, "# mistakes": self.mistakes, "accuracy rate": self.rate
         }
         self.register()
 
     def register(self):
         filename = self.constant + "_performance.csv"
-        fieldnames = ["date", "time", "constant", "duration", "start position", "# correct digits", "mistakes", "rate"]
+        fieldnames = ["date", "time", "constant", "duration", "start position", "# correct digits", "# mistakes", "accuracy rate"]
         exists = False
         try:
             f = open(filename, "r")
@@ -142,22 +154,28 @@ def check(digits, start = 1, constantname = ""):
     i = start - 1
     performance = Performance(constantname, start = start)
     performance.start()
+    total = 0
     while i < len(digits):
         tecla = keyboard.read_key()
+        total +=1
         if tecla == "esc":
-            performance.stop()
             break
         elif tecla == digits[i]:
             print(tecla)
             performance.digitscounter()
             i += 1
         elif tecla in [digits[i], "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
-            print("The " + str(i+1) + "th-digit is incorrect.")
+            print("The " + str(i+1) + "-th digit is incorrect.")
             performance.mistakescounter(expecteddigit=digits[i], receiveddigit=tecla)
         else:
             print("Type a digit.")
         while keyboard.is_pressed(tecla):
-            time.sleep(0.01)
+            total += 2
+            time.sleep(0.1)
+    performance.stop()
+    while total > 0:
+        keyboard.press_and_release("backspace")
+        total -= 1
 
 def get_int_in_range(message, rng, zero="invalid"):
     print(message, end="")
