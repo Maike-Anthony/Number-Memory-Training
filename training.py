@@ -158,6 +158,9 @@ def check(digits, start = 1, constantname = ""):
     while i < len(digits):
         tecla = keyboard.read_key()
         total +=1
+        while total > 0:
+            keyboard.press_and_release("backspace")
+            total -= 1
         if tecla == "esc":
             break
         elif tecla == digits[i]:
@@ -173,9 +176,6 @@ def check(digits, start = 1, constantname = ""):
             total += 2
             time.sleep(0.1)
     performance.stop()
-    while total > 0:
-        keyboard.press_and_release("backspace")
-        total -= 1
 
 def get_int_in_range(message, rng, zero="invalid"):
     print(message, end="")
