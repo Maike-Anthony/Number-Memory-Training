@@ -2,6 +2,8 @@ import keyboard
 import time
 from datetime import date, datetime
 import os
+from decimal import Decimal
+import csv
 
 class Constants:
     def __init__(self):
@@ -23,13 +25,11 @@ class Constants:
     def setconst(self):
         name = input("Insert the number's name: ").strip().lower()
         digits = input("Paste its decimal places: ")
-        names = open("Constants.txt", "a")
-        names.write(name + "\n")
-        names.close()
+        with open("Constants.txt", "a") as names:
+            names.write(name + "\n")
         self.cons.append(name)
-        number = open(name + ".txt", "w")
-        number.write(digits)
-        number.close()
+        with open(name + ".txt", "w") as number:
+            number.write(digits)
 
     def delconst(self, index):
         question = yorn("Are you sure you want to delete " + constant.getconst(index) + "?")
@@ -37,14 +37,12 @@ class Constants:
             return
         number = self.getconst(index)
         self.cons.pop(index)
-        f = open("Constants.txt", "r")
-        oldlines = f.readlines()
-        f.close()
-        f = open("Constants.txt", "w")
-        for line in oldlines:
-            if line.strip("\n") != number:
-                f.write(line)
-        f.close()
+        with open("Constants.txt", "r") as f:
+            oldlines = f.readlines()
+        with open("Constants.txt", "w") as f:
+            for line in oldlines:
+                if line.strip("\n") != number:
+                    f.write(line)
         if os.path.isfile(number + ".txt"):
             os.remove(number + ".txt")
 
@@ -63,39 +61,101 @@ class Constants:
         
 
 class Mistakes:
-    date = ""
-    time = 0
-    constant = ""
-    position = 0
-    expected = 0
-    received = 0
-
     def __init__(self, constant, position, expected, received):
         self.date = date.today().strftime("%b-%d-%Y")
         self.time = datetime.now().strftime("%H:%M:%S")
-        self.constant = constant
-        self.position = position
-        self.expected = expected
-        self.received = received
+        self.constant = str(constant)
+        self.position = str(position)
+        self.expected = str(expected)
+        self.received = str(received)
+        self.data = {
+            "date": self.date, "time": self.time, "constant": self.constant, "position": self.position, "expected": self.expected, "received": self.received
+            }
+        self.register()
 
-    def __str__(self):
-        return self.date + "," + self.time + "," + str(self.constant) + "," +  str(self.position) \
-            + "," +  str(self.expected) + "," + str(self.received)
+    def register(self):
+        filename = self.constant + "_mistakes.csv"
+        fieldnames = ["date", "time", "constant", "position", "expected", "received"]
+        exists = False
+        try:
+            f = open(filename, "r")
+            f.close()
+            exists = True
+        except FileNotFoundError:
+            pass
+        with open(filename, "a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            if not exists:
+                writer.writeheader()
+            writer.writerow(self.data)
+
+class Performance:
+    def __init__(self, constant, start):
+        self.date = date.today().strftime("%b-%d-%Y")
+        self.time = datetime.now().strftime("%H:%M:%S")
+        self.startposition = start
+        self.digits = 0
+        self.mistakes = 0
+        self.constant = str(constant)
+        
+    def digitscounter(self):
+        self.digits += 1
+
+    def mistakescounter(self, expecteddigit, receiveddigit):
+        self.mistakes += 1
+        mistake = Mistakes(constant = self.constant, position = self.startposition + self.digits, expected = expecteddigit, received = receiveddigit)
+
+    def start(self):
+        self.starttime = time.time()
+
+    def stop(self):
+        self.end = time.time()
+        self.duration = self.end - self.starttime
+        if (Decimal(self.digits) + Decimal(self.mistakes)) != 0:
+            self.rate = ((Decimal(self.digits) / (Decimal(self.digits) + Decimal(self.mistakes)))* 100).quantize(Decimal("0.01"))
+        else:
+            self.rate = 0
+        self.data = {
+            "date": self.date, "time": self.time, "constant": self.constant, "duration": self.duration, "start position": self.startposition, "# correct digits": self.digits, "mistakes": self.mistakes, "rate": self.rate
+        }
+        self.register()
+
+    def register(self):
+        filename = self.constant + "_performance.csv"
+        fieldnames = ["date", "time", "constant", "duration", "start position", "# correct digits", "mistakes", "rate"]
+        exists = False
+        try:
+            f = open(filename, "r")
+            f.close()
+            exists = True
+        except FileNotFoundError:
+            pass
+        with open(filename, "a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            if not exists:
+                writer.writeheader()
+            writer.writerow(self.data)
 
 def check(digits, start = 1, constantname = ""):
     print("Type the digits (esc to leave): ")
     time.sleep(0.1)
     i = start - 1
+    performance = Performance(constantname, start = start)
+    performance.start()
     while i < len(digits):
         tecla = keyboard.read_key()
         if tecla == "esc":
+            performance.stop()
             break
         elif tecla == digits[i]:
             print(tecla)
+            performance.digitscounter()
             i += 1
-        elif tecla != digits[i]:
+        elif tecla in [digits[i], "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
             print("The " + str(i+1) + "th-digit is incorrect.")
-            mistake = Mistakes(constant=constantname, position=i+1, expected=digits[i], received=tecla)
+            performance.mistakescounter(expecteddigit=digits[i], receiveddigit=tecla)
+        else:
+            print("Type a digit.")
         while keyboard.is_pressed(tecla):
             time.sleep(0.01)
 
