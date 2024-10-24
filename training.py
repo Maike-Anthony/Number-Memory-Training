@@ -110,9 +110,9 @@ class Performance:
     def digitscounter(self):
         self.digits += 1
 
-    def mistakescounter(self, expecteddigit, receiveddigit):
+    def mistakescounter(self, expecteddigit, receiveddigit, position):
         self.mistakes += 1
-        mistake = Mistakes(constant = self.constant, position = self.startposition + self.digits, expected = expecteddigit, received = receiveddigit)
+        mistake = Mistakes(constant = self.constant, position = position, expected = expecteddigit, received = receiveddigit)
 
     def start(self):
         self.starttime = datetime.now()
@@ -149,7 +149,7 @@ class Performance:
             writer.writerow(self.data)
 
 def check(digits, start = 1, constantname = ""):
-    print("Type the digits (esc to leave): ")
+    print("Type the digits (esc leaves / right arrow shows next): ")
     time.sleep(0.1)
     i = start - 1
     performance = Performance(constantname, start = start)
@@ -163,17 +163,20 @@ def check(digits, start = 1, constantname = ""):
             total -= 1
         if tecla == "esc":
             break
+        elif tecla == "right":
+            print(str(i+1) + "-th digit: " + digits[i])
+            i += 1
         elif tecla == digits[i]:
             print(tecla)
             performance.digitscounter()
             i += 1
         elif tecla in [digits[i], "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]:
             print("The " + str(i+1) + "-th digit is incorrect.")
-            performance.mistakescounter(expecteddigit=digits[i], receiveddigit=tecla)
+            performance.mistakescounter(expecteddigit=digits[i], receiveddigit=tecla, position=i+1)
         else:
             print("Type a digit.")
         while keyboard.is_pressed(tecla):
-            total += 2
+            total += 1
             time.sleep(0.1)
     performance.stop()
 
