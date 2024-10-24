@@ -1,3 +1,4 @@
-Phi
 Pi
 Euler's number
+Phi
+Square root of two
