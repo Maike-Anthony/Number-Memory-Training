@@ -157,6 +157,7 @@ def check(digits, start = 1, constantname = ""):
     while i < len(digits):
         keyboard.block_key("enter")
         tecla = keyboard.read_key()
+        keyboard.press_and_release("esc")
         if tecla == "esc":
             break
         elif tecla == "right":
@@ -172,8 +173,7 @@ def check(digits, start = 1, constantname = ""):
         else:
             print("Type a digit.")
         while keyboard.is_pressed(tecla):
-            time.sleep(0.1)
-    keyboard.press_and_release("esc")
+            time.sleep(0.01)
     keyboard.unhook_all()
     performance.stop()
 
