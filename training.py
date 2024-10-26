@@ -155,6 +155,7 @@ def check(digits, start = 1, constantname = ""):
     performance = Performance(constantname, start = start)
     performance.start()
     while i < len(digits):
+        keyboard.block_key("enter")
         tecla = keyboard.read_key()
         if tecla == "esc":
             break
@@ -172,7 +173,8 @@ def check(digits, start = 1, constantname = ""):
             print("Type a digit.")
         while keyboard.is_pressed(tecla):
             time.sleep(0.1)
-    keyboard.press_and_release("ctrl+alt+backspace")
+    keyboard.press_and_release("esc")
+    keyboard.unhook_all()
     performance.stop()
 
 def get_int_in_range(message, rng, zero="invalid"):
