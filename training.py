@@ -171,8 +171,10 @@ def check(digits, start = 1, constantname = ""):
             performance.mistakescounter(expecteddigit=digits[i], receiveddigit=tecla, position=i+1)
         else:
             print("Type a digit.")
-        while keyboard.is_pressed(tecla):
-            time.sleep(0.01)
+        while True:
+            if not keyboard.is_pressed(tecla):
+                time.sleep(0.01)
+                break
     performance.stop()
     keyboard.unhook_all()
 
