@@ -173,8 +173,8 @@ def check(digits, start = 1, constantname = ""):
             print("Type a digit.")
         while keyboard.is_pressed(tecla):
             time.sleep(0.01)
-    keyboard.unhook_all()
     performance.stop()
+    keyboard.unhook_all()
 
 def get_int_in_range(message, rng, zero="invalid"):
     print(message, end="")
