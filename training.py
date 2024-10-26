@@ -150,7 +150,6 @@ class Performance:
 
 def check(digits, start = 1, constantname = ""):
     print("Type the digits (esc leaves / right arrow shows next): ")
-    time.sleep(0.1)
     i = start - 1
     performance = Performance(constantname, start = start)
     performance.start()
