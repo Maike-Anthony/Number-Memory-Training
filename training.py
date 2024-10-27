@@ -149,10 +149,11 @@ class Performance:
             writer.writerow(self.data)
 
 def check(digits, start = 1, constantname = ""):
-    print("Type the digits (esc leaves / right arrow shows next): ")
+    print("Type the digits (esc leaves / right arrow skips): ")
     i = start - 1
     performance = Performance(constantname, start = start)
     performance.start()
+    skipped = 0
     while i < len(digits):
         keyboard.block_key("enter")
         tecla = keyboard.read_key()
@@ -162,6 +163,7 @@ def check(digits, start = 1, constantname = ""):
         elif tecla == "right":
             print(str(i+1) + "-th digit: " + digits[i])
             i += 1
+            skipped += 1
         elif tecla == digits[i]:
             print(tecla)
             performance.digitscounter()
@@ -177,6 +179,9 @@ def check(digits, start = 1, constantname = ""):
                 break
     performance.stop()
     keyboard.unhook_all()
+    print()
+    print(f"Correct: {performance.digits}\nIncorrect: {performance.mistakes}\nAccuracy: {performance.rate}\nSkipped: {skipped}")
+    print()
 
 def get_int_in_range(message, rng, zero="invalid"):
     print(message, end="")
@@ -233,7 +238,6 @@ def main():
         chosen_start = get_int_in_range("Do you want to start at what position? ", len(digits))
         check(digits, start = chosen_start, constantname=constant.getconst(n-1))
         f.close()
-        print()
         question = yorn("Do you want to train again?")
         if question == False:
             break
