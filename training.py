@@ -105,6 +105,7 @@ class Performance:
         self.startposition = start
         self.digits = 0
         self.mistakes = 0
+        self.skipped = 0
         self.constant = str(constant)
         
     def digitscounter(self):
@@ -113,6 +114,9 @@ class Performance:
     def mistakescounter(self, expecteddigit, receiveddigit, position):
         self.mistakes += 1
         mistake = Mistakes(constant = self.constant, position = position, expected = expecteddigit, received = receiveddigit)
+
+    def skippedcounter(self):
+        self.skipped += 1
 
     def start(self):
         self.starttime = datetime.now()
@@ -128,13 +132,13 @@ class Performance:
         else:
             self.rate = 0
         self.data = {
-            "date": self.date, "time": self.time, "constant": self.constant, "duration": self.duration, "start position": self.startposition, "# correct digits": self.digits, "# mistakes": self.mistakes, "accuracy rate": self.rate
+            "date": self.date, "time": self.time, "constant": self.constant, "duration": self.duration, "start position": self.startposition, "# correct digits": self.digits, "# mistakes": self.mistakes, "accuracy rate": self.rate, "# skipped": self.skipped
         }
         self.register()
 
     def register(self):
         filename = self.constant + "_performance.csv"
-        fieldnames = ["date", "time", "constant", "duration", "start position", "# correct digits", "# mistakes", "accuracy rate"]
+        fieldnames = ["date", "time", "constant", "duration", "start position", "# correct digits", "# mistakes", "accuracy rate", "# skipped"]
         exists = False
         try:
             f = open(filename, "r")
@@ -148,12 +152,14 @@ class Performance:
                 writer.writeheader()
             writer.writerow(self.data)
 
+    def __str__(self):
+        return f"\nDuration: {self.duration}\nCorrect: {self.digits}\nIncorrect: {self.mistakes}\nAccuracy: {self.rate}\nSkipped: {self.skipped}\n"
+
 def check(digits, start = 1, constantname = ""):
     print("Type the digits (esc leaves / right arrow skips): ")
     i = start - 1
     performance = Performance(constantname, start = start)
     performance.start()
-    skipped = 0
     while i < len(digits):
         keyboard.block_key("enter")
         tecla = keyboard.read_key()
@@ -162,8 +168,8 @@ def check(digits, start = 1, constantname = ""):
             break
         elif tecla == "right":
             print(str(i+1) + "-th digit: " + digits[i])
+            performance.skippedcounter()
             i += 1
-            skipped += 1
         elif tecla == digits[i]:
             print(tecla)
             performance.digitscounter()
@@ -179,9 +185,7 @@ def check(digits, start = 1, constantname = ""):
                 break
     performance.stop()
     keyboard.unhook_all()
-    print()
-    print(f"Correct: {performance.digits}\nIncorrect: {performance.mistakes}\nAccuracy: {performance.rate}\nSkipped: {skipped}")
-    print()
+    print(performance)
 
 def get_int_in_range(message, rng, zero="invalid"):
     print(message, end="")
