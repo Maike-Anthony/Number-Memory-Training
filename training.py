@@ -155,7 +155,7 @@ class Performance:
     def __str__(self):
         return f"\nDuration: {self.duration}\nCorrect: {self.digits}\nIncorrect: {self.mistakes}\nAccuracy: {self.rate}\nSkipped: {self.skipped}\n"
 
-def check(digits, start = 1, constantname = ""):
+def check(digits, start = 1, length = -1, constantname = ""):
     print("Type the digits (esc leaves / right arrow skips): ")
     i = start - 1
     performance = Performance(constantname, start = start)
@@ -179,6 +179,8 @@ def check(digits, start = 1, constantname = ""):
             performance.mistakescounter(expecteddigit=digits[i], receiveddigit=tecla, position=i+1)
         else:
             print("Type a digit.")
+        if i - start + 2 > length and length != -1:
+            break
         while True:
             if not keyboard.is_pressed(tecla):
                 time.sleep(0.01)
@@ -240,7 +242,8 @@ def main():
             exit()
         digits = f.read()
         chosen_start = get_int_in_range("Do you want to start at what position? ", len(digits))
-        check(digits, start = chosen_start, constantname=constant.getconst(n-1))
+        chosen_length = get_int_in_range("Do you want to practice how many digits? ", len(digits) - chosen_start + 1)
+        check(digits, start = chosen_start, length = chosen_length, constantname=constant.getconst(n-1))
         f.close()
         question = yorn("Do you want to train again?")
         if question == False:
